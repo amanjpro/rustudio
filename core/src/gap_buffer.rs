@@ -1,6 +1,6 @@
 const MAXIMUM_GAP_SIZE: usize = 512;
 
-struct GapBuffer<T> where T: Copy {
+pub struct GapBuffer<T> where T: Copy {
     buffer: Vec<T>,
     gap_start: usize,
     gap_end: usize,
