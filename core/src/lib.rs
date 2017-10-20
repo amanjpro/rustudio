@@ -1,2 +1,2 @@
-pub mod buffer;
+pub mod line_buffer;
 
