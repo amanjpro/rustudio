@@ -1,9 +1,9 @@
 const MAXIMUM_GAP_SIZE: usize = 512;
 
 pub struct GapBuffer<T> {
-    pub buffer: Vec<T>,
-    pub gap_start: usize,
-    pub gap_end: usize,
+    buffer: Vec<T>,
+    gap_start: usize,
+    gap_end: usize,
 }
 
 impl <T>GapBuffer<T> {
@@ -21,6 +21,14 @@ impl <T>GapBuffer<T> {
             gap_start: 0,
             gap_end: MAXIMUM_GAP_SIZE - 1,
         }
+    }
+
+    pub fn get(&self, item: usize) -> Option<&T> {
+        self.buffer.get(item)
+    }
+
+    pub fn get_mut(&mut self, item: usize) -> Option<&mut T> {
+        self.buffer.get_mut(item)
     }
 
     pub fn seek(&mut self, col: usize) {
@@ -46,6 +54,10 @@ impl <T>GapBuffer<T> {
                 index -= 1;
             }
         }
+    }
+
+    pub fn get_current_index(&self) -> usize {
+        self.gap_start
     }
 
     pub fn insert(&mut self, item: T) {
