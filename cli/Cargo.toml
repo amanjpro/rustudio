@@ -1,0 +1,12 @@
+[package]
+name = "rustudio_cli"
+version = "0.1.0"
+authors = ["amanjpro <amanjpro@gmail.com>"]
+
+[dependencies]
+ncurses = "5.86.0"
+rustudio_core = { path = "../core" }
+
+[[bin]]
+path = "src/main.rs"
+name = "rustudio_cli"
