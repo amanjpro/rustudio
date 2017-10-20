@@ -1,12 +1,12 @@
 const MAXIMUM_GAP_SIZE: usize = 512;
 
-pub struct GapBuffer<T> where T: Copy {
-    buffer: Vec<T>,
-    gap_start: usize,
-    gap_end: usize,
+pub struct GapBuffer<T> {
+    pub buffer: Vec<T>,
+    pub gap_start: usize,
+    pub gap_end: usize,
 }
 
-impl <T>GapBuffer<T> where T: Copy {
+impl <T>GapBuffer<T> {
     pub fn new() -> Self {
         GapBuffer {
             buffer: Vec::with_capacity(MAXIMUM_GAP_SIZE),
@@ -22,10 +22,7 @@ impl <T>GapBuffer<T> where T: Copy {
         if col < self.gap_start {
             let mut index = col;
             while self.gap_start > index {
-                unsafe {
-                    let &item = self.buffer.get_unchecked(index);
-                    self.buffer.insert(self.gap_end, item);
-                }
+                self.buffer.swap(index, self.gap_end);
                 self.gap_start -= 1;
                 self.gap_end -= 1;
                 index += 1;
@@ -35,10 +32,7 @@ impl <T>GapBuffer<T> where T: Copy {
         } else {
             let mut index = col;
             while self.gap_start < index {
-                unsafe {
-                    let &item = self.buffer.get_unchecked(index);
-                    self.buffer.insert(self.gap_start, item);
-                }
+                self.buffer.swap(self.gap_start, index);
                 self.gap_start += 1;
                 self.gap_end += 1;
                 index -= 1;
