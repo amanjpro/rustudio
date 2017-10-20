@@ -7,11 +7,19 @@ pub struct GapBuffer<T> {
 }
 
 impl <T>GapBuffer<T> {
+    pub fn with_capacity(capacity: usize) -> Self {
+        GapBuffer {
+            buffer: Vec::with_capacity(capacity),
+            gap_start: 0,
+            gap_end: capacity - 1,
+        }
+    }
+
     pub fn new() -> Self {
         GapBuffer {
             buffer: Vec::with_capacity(MAXIMUM_GAP_SIZE),
             gap_start: 0,
-            gap_end: MAXIMUM_GAP_SIZE,
+            gap_end: MAXIMUM_GAP_SIZE - 1,
         }
     }
 
