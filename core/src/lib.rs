@@ -45,6 +45,10 @@ pub fn put_char(buffer: &mut Buffer, ch: char) {
     }
 }
 
+fn new_file(path: &str) -> Buffer {
+    GapBuffer::new()
+}
+
 fn open_file(path: &str) -> Buffer {
     let reader = BufReader::new(File::open(path).expect("file not found"));
     let lines = reader.lines();
