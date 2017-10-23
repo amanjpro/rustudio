@@ -99,6 +99,47 @@ impl <T>GapBuffer<T> {
         }
     }
 
+    pub fn map<V>(&self, f: &Fn(&T) -> V) -> GapBuffer<V> {
+        let mut transformed: Vec<V> = Vec::with_capacity(self.buffer.capacity());
+        let mut index = 0;
+        let len = self.buffer.len();
+        while index < len {
+            if index == self.gap_start {
+                index = self.gap_end;
+            } else {
+                unsafe {
+                    let elem = self.buffer.get_unchecked(index);
+                    let telem = f(elem);
+                    transformed.insert(index, telem);
+                }
+            }
+            index += 1;
+        }
+
+        GapBuffer {
+            buffer: transformed,
+            len: self.len,
+            gap_start: self.gap_start,
+            gap_end: self.gap_end,
+        }
+    }
+
+    pub fn for_each(&self, f: &mut FnMut(&T) -> ()) {
+        let mut index = 0;
+        let len = self.buffer.len();
+        while index < len {
+            if index == self.gap_start {
+                index = self.gap_end;
+            } else {
+                unsafe {
+                    let mut elem = self.buffer.get_unchecked(index);
+                    f(elem);
+                }
+            }
+            index += 1;
+        }
+    }
+
     pub fn count(&self) -> usize {
         self.len
     }
