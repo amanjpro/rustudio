@@ -2,7 +2,9 @@ pub mod gap_buffer;
 
 use gap_buffer::GapBuffer;
 use std::fs::File;
-use std::io::{BufReader, BufRead};
+use std::path::Path;
+use std::io::prelude::*;
+use std::io::{BufReader, BufRead, BufWriter, Write};
 
 type LineBuffer = GapBuffer<char>;
 type Buffer = GapBuffer<LineBuffer>;
@@ -45,16 +47,18 @@ pub fn put_char(buffer: &mut Buffer, ch: char) {
     }
 }
 
-fn new_file(path: &str) -> Buffer {
+pub fn empty_buffer() -> Buffer {
     GapBuffer::new()
 }
 
-fn open_file(path: &str) -> Buffer {
-    let reader = BufReader::new(File::open(path).expect("file not found"));
+pub fn open_file(path: &str) -> Buffer {
+    let file = File::open(&Path::new(path)).expect(&format!("Cannot open the file: {}", path));
+    let reader = BufReader::new(file);
     let lines = reader.lines();
     let (lo, hi) = lines.size_hint();
+    println!("the size of the file is between {} and {:?}", lo, hi);
     let size = hi.unwrap_or(lo);
-    let mut buffer: Buffer = GapBuffer::with_capacity(size);
+    let mut buffer: Buffer = GapBuffer::with_capacity(if size == 0 { 100 } else { size });
     for line in lines {
         if let Ok(line) = line {
             for ch in line.chars() {
@@ -66,6 +70,22 @@ fn open_file(path: &str) -> Buffer {
     buffer
 }
 
+pub fn save_buffer(buffer: &mut Buffer, path: &str) {
+    let file = File::create(&Path::new(path)).expect(&format!("Cannot write to the path: {}", path));
+    let mut writer = BufWriter::new(file);
+
+    let new_line = &['\n' as u8];
+    let line_num = buffer.count();
+    let mut count = 0;
+    buffer.for_each(&mut |line| {
+        line.for_each(&mut |ch| { writer.write(&[*ch as u8]); });
+        count += 1;
+        if count < line_num {
+            writer.write(new_line);
+        }
+    });
+}
+
 // Helper functions
 
 fn get_active_line_index(buffer: &Buffer) -> usize {
@@ -73,17 +93,23 @@ fn get_active_line_index(buffer: &Buffer) -> usize {
     if idx == 0 { idx } else { idx - 1 }
 }
 
-fn get_line(buffer: &Buffer) -> Option<&LineBuffer> {
-    buffer.get(get_active_line_index(buffer))
+fn get_line(buffer: &mut Buffer) -> Option<&LineBuffer> {
+    let index = get_active_line_index(buffer);
+    if buffer.is_empty() {
+        let new_line = GapBuffer::new();
+        buffer.insert(new_line);
+    }
+    buffer.get(index)
 }
 
 fn get_mut_line(buffer: &mut Buffer) -> Option<&mut LineBuffer> {
-    let idx = get_active_line_index(buffer);
-    buffer.get_mut(idx)
+    let index = get_active_line_index(buffer);
+    if buffer.is_empty() {
+        let new_line = GapBuffer::new();
+        buffer.insert(new_line);
+    }
+    buffer.get_mut(index)
 }
-
-
-
 
 //
 // pub fn open(path: &str) -> Buffer {
