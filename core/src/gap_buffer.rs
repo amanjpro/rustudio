@@ -79,8 +79,8 @@ impl <T>GapBuffer<T> {
                     self.gap_end = new_index;
                 } else {
                     unsafe {
-                        let ref item = self.buffer.get_unchecked(index);
-                        new_buffer.insert(new_index, *item);
+                        let item = self.buffer.get_unchecked(index);
+                        new_buffer.insert(new_index, item);
                     }
                     index += 1;
                     new_index += 1;
