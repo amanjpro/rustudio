@@ -4,12 +4,14 @@ pub struct GapBuffer<T> {
     buffer: Vec<T>,
     gap_start: usize,
     gap_end: usize,
+    len: usize
 }
 
 impl <T>GapBuffer<T> {
     pub fn with_capacity(capacity: usize) -> Self {
         GapBuffer {
             buffer: Vec::with_capacity(capacity),
+            len: 0,
             gap_start: 0,
             gap_end: if capacity > 0 { capacity - 1 } else { capacity },
         }
@@ -19,6 +21,7 @@ impl <T>GapBuffer<T> {
         GapBuffer {
             buffer: Vec::with_capacity(MAXIMUM_GAP_SIZE),
             gap_start: 0,
+            len: 0,
             gap_end: MAXIMUM_GAP_SIZE - 1,
         }
     }
@@ -81,12 +84,18 @@ impl <T>GapBuffer<T> {
             }
         }
         self.buffer.insert(self.gap_start, item);
+        self.len += 1;
         self.gap_start += 1;
     }
 
     pub fn delete(&mut self) {
         if self.gap_start > 0 {
             self.gap_start -= 1;
+            self.len -= 1;
         }
+    }
+
+    pub fn count(&self) -> usize {
+        self.len
     }
 }
