@@ -11,7 +11,7 @@ impl <T>GapBuffer<T> {
         GapBuffer {
             buffer: Vec::with_capacity(capacity),
             gap_start: 0,
-            gap_end: capacity - 1,
+            gap_end: if capacity > 0 { capacity - 1 } else { capacity },
         }
     }
 
