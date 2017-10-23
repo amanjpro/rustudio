@@ -26,6 +26,10 @@ impl <T>GapBuffer<T> {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.buffer.is_empty()
+    }
+
     pub fn get(&self, item: usize) -> Option<&T> {
         self.buffer.get(item)
     }
