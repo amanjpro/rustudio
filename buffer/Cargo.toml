@@ -1,4 +1,4 @@
 [package]
-name = "rustudio_core"
+name = "rustudio_buffer"
 version = "0.1.0"
 authors = ["amanjpro <amanjpro@gmail.com>"]

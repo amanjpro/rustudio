@@ -1,7 +1,8 @@
 extern crate ncurses;
-extern crate rustudio_core;
+extern crate rustudio_buffer;
 
 use ncurses::*;
+use rustudio_buffer::*;
 
 fn curses_init() {
     initscr();              // Start ncurses mode

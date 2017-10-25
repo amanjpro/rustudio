@@ -5,7 +5,7 @@ authors = ["amanjpro <amanjpro@gmail.com>"]
 
 [dependencies]
 ncurses = "5.86.0"
-rustudio_core = { path = "../core" }
+rustudio_buffer = { path = "../buffer" }
 
 [[bin]]
 path = "src/main.rs"
