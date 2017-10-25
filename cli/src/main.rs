@@ -1,5 +1,6 @@
 extern crate ncurses;
 extern crate rustudio_buffer;
+extern crate rustudio_engine;
 
 use ncurses::*;
 use rustudio_buffer::*;

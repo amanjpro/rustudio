@@ -7,7 +7,7 @@ use std::io::prelude::*;
 use std::io::{BufReader, BufRead, BufWriter, Write};
 
 type LineBuffer = GapBuffer<char>;
-type Buffer = GapBuffer<LineBuffer>;
+pub type Buffer = GapBuffer<LineBuffer>;
 
 
 // Public interface
@@ -86,9 +86,7 @@ pub fn save_buffer(buffer: &mut Buffer, path: &str) {
     });
 }
 
-// Helper functions
-
-fn get_active_line_index(buffer: &mut Buffer) -> usize {
+pub fn get_active_line_index(buffer: &mut Buffer) -> usize {
     let idx = buffer.get_current_index();
     if idx == 0 {
         buffer.insert(LineBuffer::new());
@@ -96,12 +94,12 @@ fn get_active_line_index(buffer: &mut Buffer) -> usize {
     } else { idx - 1 }
 }
 
-fn get_line(buffer: &mut Buffer) -> Option<&LineBuffer> {
+pub fn get_line(buffer: &mut Buffer) -> Option<&LineBuffer> {
     let index = get_active_line_index(buffer);
     buffer.get(index)
 }
 
-fn get_mut_line(buffer: &mut Buffer) -> Option<&mut LineBuffer> {
+pub fn get_mut_line(buffer: &mut Buffer) -> Option<&mut LineBuffer> {
     let index = get_active_line_index(buffer);
     buffer.get_mut(index)
 }
