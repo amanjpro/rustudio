@@ -1,16 +1,31 @@
+use std::default::Default;
+use std::fmt::Debug;
+
 const MAXIMUM_GAP_SIZE: usize = 512;
 
-pub struct GapBuffer<T> {
+#[derive(Debug)]
+pub struct GapBuffer<T> where T: Default + Debug {
     buffer: Vec<T>,
     gap_start: usize,
     gap_end: usize,
     len: usize
 }
 
-impl <T>GapBuffer<T> {
+impl<T> Default for GapBuffer<T> where T: Default + Debug {
+    fn default() -> Self {
+        GapBuffer {
+            buffer: GapBuffer::fill(0),
+            gap_start: 0,
+            gap_end: 0,
+            len: 0,
+        }
+    }
+}
+
+impl <T>GapBuffer<T> where T: Default + Debug {
     pub fn with_capacity(capacity: usize) -> Self {
         GapBuffer {
-            buffer: Vec::with_capacity(capacity),
+            buffer: GapBuffer::fill(capacity),
             len: 0,
             gap_start: 0,
             gap_end: if capacity > 0 { capacity - 1 } else { capacity },
@@ -19,15 +34,25 @@ impl <T>GapBuffer<T> {
 
     pub fn new() -> Self {
         GapBuffer {
-            buffer: Vec::with_capacity(MAXIMUM_GAP_SIZE),
+            buffer: GapBuffer::fill(MAXIMUM_GAP_SIZE),
             gap_start: 0,
             len: 0,
             gap_end: MAXIMUM_GAP_SIZE - 1,
         }
     }
 
+    fn fill(size: usize) -> Vec<T> {
+        let mut index = 0;
+        let mut vec = Vec::with_capacity(size);
+        while index < size {
+            vec.push(T::default());
+            index += 1;
+        }
+        vec
+    }
+
     pub fn is_empty(&self) -> bool {
-        self.buffer.is_empty()
+        self.len == 0
     }
 
     pub fn get(&self, item: usize) -> Option<&T> {
@@ -38,27 +63,40 @@ impl <T>GapBuffer<T> {
         self.buffer.get_mut(item)
     }
 
+
+    /*
+       columns start from 0
+
+       ---S-------A----
+       seek(3) should lead to
+       --S-------A-----
+       seek(4)
+       ----S-------A---
+     */
     pub fn seek(&mut self, col: usize) {
-        if col > self.buffer.len() {
+        let gap_size = self.gap_end - self.gap_start;
+        if col >= self.count() && col < 0 {
             return;
-        }
-        if col < self.gap_start {
-            let mut index = col;
-            while self.gap_start > index {
+        } else if col <= self.gap_start {
+            let (swap_start, swap_end) = (col, self.gap_start - 1);
+            let mut index = swap_end;
+            while index >= swap_start {
                 self.buffer.swap(index, self.gap_end);
                 self.gap_start -= 1;
                 self.gap_end -= 1;
-                index += 1;
+                if index == 0 {
+                    break;
+                }
+                index -= 1;
             }
-        } else if col > self.gap_start && col < self.gap_end {
-            self.gap_start = col;
         } else {
-            let mut index = col;
-            while self.gap_start < index {
-                self.buffer.swap(self.gap_start, index);
+            let (swap_start, swap_end) = (self.gap_end + 1, self.gap_end + col);
+            let mut index = swap_start;
+            while index <= swap_end {
+                self.buffer.swap(index, self.gap_start);
                 self.gap_start += 1;
                 self.gap_end += 1;
-                index -= 1;
+                index += 1;
             }
         }
     }
@@ -68,26 +106,26 @@ impl <T>GapBuffer<T> {
     }
 
     pub fn insert(&mut self, item: T) {
-        if self.gap_start >= self.gap_end {
-            let mut new_buffer = Vec::with_capacity(self.buffer.capacity() * 2);
+        if self.gap_start == self.gap_end {
+            let mut new_buffer: Vec<T> = GapBuffer::fill(self.count() + MAXIMUM_GAP_SIZE);
             let mut index = 0;
             let mut new_index = 0;
-            while index < self.buffer.len() {
-                if index == self.gap_start {
-                    new_index += MAXIMUM_GAP_SIZE;
+            while index < self.len {
+                if index == self.gap_start - 1 {
+                    new_index += MAXIMUM_GAP_SIZE + 1;
                     index += 1;
-                    self.gap_end = new_index;
                 } else {
-                    unsafe {
-                        let item = self.buffer.get_unchecked(index);
-                        new_buffer.insert(new_index, item);
+                    if let Some(item) = self.buffer.pop() {
+                        new_buffer[new_index] = item;
                     }
                     index += 1;
                     new_index += 1;
                 }
             }
+            self.buffer = new_buffer;
+            self.gap_end = self.gap_start + MAXIMUM_GAP_SIZE;
         }
-        self.buffer.insert(self.gap_start, item);
+        self.buffer[self.gap_start] = item;
         self.len += 1;
         self.gap_start += 1;
     }
@@ -99,8 +137,8 @@ impl <T>GapBuffer<T> {
         }
     }
 
-    pub fn map<V>(&self, f: &Fn(&T) -> V) -> GapBuffer<V> {
-        let mut transformed: Vec<V> = Vec::with_capacity(self.buffer.capacity());
+    pub fn map<V>(&self, f: &Fn(&T) -> V) -> GapBuffer<V> where V: Default + Debug  {
+        let mut transformed: Vec<V> = GapBuffer::fill(self.buffer.capacity());
         let mut index = 0;
         let len = self.buffer.len();
         while index < len {

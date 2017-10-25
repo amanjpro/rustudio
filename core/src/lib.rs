@@ -88,26 +88,21 @@ pub fn save_buffer(buffer: &mut Buffer, path: &str) {
 
 // Helper functions
 
-fn get_active_line_index(buffer: &Buffer) -> usize {
+fn get_active_line_index(buffer: &mut Buffer) -> usize {
     let idx = buffer.get_current_index();
-    if idx == 0 { idx } else { idx - 1 }
+    if idx == 0 {
+        buffer.insert(LineBuffer::new());
+        idx
+    } else { idx - 1 }
 }
 
 fn get_line(buffer: &mut Buffer) -> Option<&LineBuffer> {
     let index = get_active_line_index(buffer);
-    if buffer.is_empty() {
-        let new_line = GapBuffer::new();
-        buffer.insert(new_line);
-    }
     buffer.get(index)
 }
 
 fn get_mut_line(buffer: &mut Buffer) -> Option<&mut LineBuffer> {
     let index = get_active_line_index(buffer);
-    if buffer.is_empty() {
-        let new_line = GapBuffer::new();
-        buffer.insert(new_line);
-    }
     buffer.get_mut(index)
 }
 
