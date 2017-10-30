@@ -17,7 +17,7 @@ pub fn seek_to_line(buffer: &mut Buffer, row: usize) {
 
 pub fn seek_to_col(buffer: &mut Buffer, row: usize, col: usize) {
     buffer.seek(row);
-    if let Some(mut line) = get_mut_line(buffer) {
+    if let Some(mut line) = get_mut_active_line(buffer) {
         line.seek(col);
     }
 }
@@ -29,7 +29,7 @@ pub fn delete_line(buffer: &mut Buffer, row: usize) {
 
 pub fn delete_char(buffer: &mut Buffer, row: usize, col: usize) {
     buffer.seek(row);
-    if let Some(mut line) = get_mut_line(buffer) {
+    if let Some(mut line) = get_mut_active_line(buffer) {
         line.seek(col);
         line.delete();
     }
@@ -41,7 +41,7 @@ pub fn put_char(buffer: &mut Buffer, ch: char) {
     } else if ch == '\n' {
         buffer.insert(GapBuffer::new());
     } else {
-        if let Some(mut line) = get_mut_line(buffer) {
+        if let Some(mut line) = get_mut_active_line(buffer) {
             line.insert(ch);
         };
     }
@@ -94,15 +94,46 @@ pub fn get_active_line_index(buffer: &mut Buffer) -> usize {
     } else { idx - 1 }
 }
 
-pub fn get_line(buffer: &mut Buffer) -> Option<&LineBuffer> {
+pub fn get_active_col_index(buffer: &mut Buffer) -> usize {
+    if let Some(line) = get_active_line(buffer) {
+        let idx = line.get_current_index();
+        if idx == 0 { idx } else { idx - 1 }
+    } else { 0 }
+}
+
+pub fn get_line(buffer: &Buffer, l: usize) -> Option<&LineBuffer> {
+    buffer.get(l)
+}
+
+pub fn get_mut_line(buffer: &mut Buffer, l: usize) -> Option<&mut LineBuffer> {
+    buffer.get_mut(l)
+}
+
+pub fn get_char(buffer: &Buffer, l: usize, c: usize) -> Option<&char> {
+    if let Some(line) = buffer.get(l) {
+        line.get(c)
+    } else { None }
+}
+
+pub fn get_mut_char(buffer: &mut Buffer, l: usize, c: usize) -> Option<&mut char> {
+    if let Some(line) = buffer.get_mut(l) {
+        line.get_mut(c)
+    } else { None }
+}
+
+// Helper functions
+
+fn get_active_line(buffer: &mut Buffer) -> Option<&LineBuffer> {
     let index = get_active_line_index(buffer);
     buffer.get(index)
 }
 
-pub fn get_mut_line(buffer: &mut Buffer) -> Option<&mut LineBuffer> {
+fn get_mut_active_line(buffer: &mut Buffer) -> Option<&mut LineBuffer> {
     let index = get_active_line_index(buffer);
     buffer.get_mut(index)
 }
+
+
 
 //
 // pub fn open(path: &str) -> Buffer {

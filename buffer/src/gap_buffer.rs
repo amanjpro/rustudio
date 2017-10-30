@@ -55,6 +55,22 @@ impl <T>GapBuffer<T> where T: Default + Debug {
         self.len == 0
     }
 
+    pub fn get_item_at(&self, idx: usize) -> Option<&T> {
+        if idx < self.gap_start {
+            self.buffer.get(idx)
+        } else {
+            self.buffer.get(idx + self.gap_end - self.gap_start + 1)
+        }
+    }
+
+    pub fn get_mut_item_at(&mut self, idx: usize) -> Option<&mut T> {
+        if idx < self.gap_start {
+            self.buffer.get_mut(idx)
+        } else {
+            self.buffer.get_mut(idx + self.gap_end - self.gap_start + 1)
+        }
+    }
+
     pub fn get(&self, item: usize) -> Option<&T> {
         self.buffer.get(item)
     }
@@ -73,12 +89,19 @@ impl <T>GapBuffer<T> where T: Default + Debug {
        seek(4)
        ----S-------A---
      */
-    pub fn seek(&mut self, col: usize) {
+    pub fn seek(&mut self, seek_to: usize) {
         let gap_size = self.gap_end - self.gap_start;
-        if col >= self.count() && col < 0 {
+
+        let seek_to  = if seek_to > 0 && seek_to >= self.count() {
+            self.count() - 1
+        } else {
+            seek_to
+        };
+
+        if seek_to < 0 {
             return;
-        } else if col <= self.gap_start {
-            let (swap_start, swap_end) = (col, self.gap_start - 1);
+        } else if seek_to <= self.gap_start {
+            let (swap_start, swap_end) = (seek_to, self.gap_start - 1);
             let mut index = swap_end;
             while index >= swap_start {
                 self.buffer.swap(index, self.gap_end);
@@ -90,7 +113,7 @@ impl <T>GapBuffer<T> where T: Default + Debug {
                 index -= 1;
             }
         } else {
-            let (swap_start, swap_end) = (self.gap_end + 1, self.gap_end + col);
+            let (swap_start, swap_end) = (self.gap_end + 1, self.gap_end + seek_to);
             let mut index = swap_start;
             while index <= swap_end {
                 self.buffer.swap(index, self.gap_start);
