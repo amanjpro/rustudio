@@ -79,7 +79,6 @@ impl <T>GapBuffer<T> where T: Default + Debug {
         self.buffer.get_mut(item)
     }
 
-
     /*
        columns start from 0
 
