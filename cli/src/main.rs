@@ -1,9 +1,10 @@
 extern crate ncurses;
-extern crate rustudio_buffer;
+// extern crate rustudio_utils;
+// extern crate rustudio_buffer;
 extern crate rustudio_engine;
 
 use ncurses::*;
-use rustudio_buffer::*;
+//use rustudio_buffer::*;
 use rustudio_engine::*;
 
 fn curses_init() {

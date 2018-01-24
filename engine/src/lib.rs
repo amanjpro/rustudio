@@ -1,13 +1,11 @@
+extern crate rustudio_keys;
 extern crate rustudio_buffer;
 
+use rustudio_keys::*;
 use rustudio_buffer::*;
 use std::process;
 
 type KeyCombination = Vec<char>;
-
-const Ctrl: char = 17 as char;
-const Esc: char = 27 as char;
-const Backspace: char = 127 as char;
 
 pub struct Configuration {
     open_line_above: Vec<KeyCombination>,
@@ -88,11 +86,13 @@ impl Engine where {
               self.command_buffer.push(ch);
               println!("{:?}", self.command_buffer);
               if ch == Backspace {
-                  if self.command_buffer.is_empty.len() != 0 {
-                      let len = self.command_buffer.len() - 2;
-                      self.command_buffer.truncate(len);
-                      println!("{:?}", self.command_buffer);
-                  }
+                  let len = if self.command_buffer.len() > 1 {
+                      self.command_buffer.len() - 2
+                  } else {
+                      self.command_buffer.len() - 1
+                  };
+                  self.command_buffer.truncate(len);
+                  println!("{:?}", self.command_buffer);
               } else if self.conf.open_line_above.contains(&self.command_buffer) {
                   self.open_line_above();
               } else if self.conf.open_line_below.contains(&self.command_buffer) {

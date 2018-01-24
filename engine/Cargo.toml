@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["amanjpro <amanjpro@gmail.com>"]
 
 [dependencies]
+rustudio_keys = { path = "../keys" }
 rustudio_buffer = { path = "../buffer" }

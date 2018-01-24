@@ -1,5 +1,6 @@
 [workspace]
-members = ["buffer",
+members = ["keys",
+           "buffer",
            "engine",
            "cli"]
 
