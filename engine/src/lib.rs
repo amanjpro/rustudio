@@ -7,6 +7,7 @@ type KeyCombination = Vec<char>;
 
 const Ctrl: char = 17 as char;
 const Esc: char = 27 as char;
+const Backspace: char = 127 as char;
 
 pub struct Configuration {
     open_line_above: Vec<KeyCombination>,
@@ -86,7 +87,13 @@ impl Engine where {
             Mode::Normal => {
               self.command_buffer.push(ch);
               println!("{:?}", self.command_buffer);
-              if self.conf.open_line_above.contains(&self.command_buffer) {
+              if ch == Backspace {
+                  if self.command_buffer.is_empty.len() != 0 {
+                      let len = self.command_buffer.len() - 2;
+                      self.command_buffer.truncate(len);
+                      println!("{:?}", self.command_buffer);
+                  }
+              } else if self.conf.open_line_above.contains(&self.command_buffer) {
                   self.open_line_above();
               } else if self.conf.open_line_below.contains(&self.command_buffer) {
                   self.open_line_below();
