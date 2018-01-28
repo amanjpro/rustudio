@@ -1,0 +1,4 @@
+[package]
+name = "rustudio_keys"
+version = "0.1.0"
+authors = ["amanjpro <amanjpro@gmail.com>"]
