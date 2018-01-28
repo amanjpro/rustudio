@@ -62,7 +62,7 @@ impl Engine where {
     pub fn new() -> Self {
         Engine {
             mode: Mode::Normal,
-            buffer: empty_buffer(),
+            buffer: Buffer::new(),
             conf: default_configuration(),
             command_buffer: Vec::new(),
         }
@@ -78,7 +78,7 @@ impl Engine where {
               } else {
                   let len = self.command_buffer.len() - 1;
                   self.command_buffer.truncate(len);
-                  put_char(&mut self.buffer, ch);
+                  self.buffer.put_char(ch);
               }
               println!("{:?}", self.command_buffer);
             }
@@ -114,7 +114,7 @@ impl Engine where {
               } else if self.conf.insert_char_here.contains(&self.command_buffer) {
                   self.switch_mode(Mode::Insert);
               } else if self.conf.write_buffer.contains(&self.command_buffer) {
-                  save_buffer(&mut self.buffer, "/Users/amanjsherwany/Desktop/test2-1.txt");
+                  self.buffer.save_buffer("/Users/amanjsherwany/Desktop/test2-1.txt");
                   self.clear_command_buffer();
               } else if self.conf.quit_editor.contains(&self.command_buffer) {
                   stay_alive = false;
@@ -127,23 +127,12 @@ impl Engine where {
 
 
     fn open_line_above(&mut self) {
-        {
-            self.switch_mode(Mode::Insert);
-        }
-        let buffer = &mut self.buffer;
-        let row = get_active_line_index(buffer);
-        seek_to_col(buffer, row, 0);
-        put_char(buffer, '\n')
+        self.up();
+        self.buffer.new_line();
     }
 
     fn open_line_below(&mut self) {
-        {
-            self.switch_mode(Mode::Insert);
-        }
-        let buffer = &mut self.buffer;
-        let row = get_active_line_index(buffer) + 1;
-        seek_to_col(buffer, row, 0);
-        put_char(buffer, '\n')
+        self.buffer.new_line();
     }
 
     // fn go_to_start(&mut self) {
@@ -175,31 +164,27 @@ impl Engine where {
     // pub fn start_of_file(buffer: &mut Buffer) -> Selection {
 
     fn down(&mut self) {
-        let buffer = &mut self.buffer;
-        let line = get_active_line_index(buffer);
-        let col = get_active_col_index(buffer);
-        seek_to_col(buffer, line + 1, col);
+        if let Some((row, col)) = self.buffer.get_cursor_index() {
+            self.buffer.move_cursor(row + 1, col)
+        }
     }
 
     fn up(&mut self) {
-        let buffer = &mut self.buffer;
-        let line = get_active_line_index(buffer);
-        let col = get_active_col_index(buffer);
-        seek_to_col(buffer, line - 1, col);
+        if let Some((row, col)) = self.buffer.get_cursor_index() {
+            self.buffer.move_cursor(row - 1, col)
+        }
     }
 
     fn left(&mut self) {
-        let buffer = &mut self.buffer;
-        let line = get_active_line_index(buffer);
-        let col = get_active_col_index(buffer);
-        seek_to_col(buffer, line, col);
+        if let Some((row, col)) = self.buffer.get_cursor_index() {
+            self.buffer.move_cursor(row, col - 1)
+        }
     }
 
     fn right(&mut self) {
-        let buffer = &mut self.buffer;
-        let line = get_active_line_index(buffer);
-        let col = get_active_col_index(buffer);
-        seek_to_col(buffer, line, col);
+        if let Some((row, col)) = self.buffer.get_cursor_index() {
+            self.buffer.move_cursor(row, col + 1)
+        }
     }
 
     fn switch_mode(&mut self, mode: Mode) {
