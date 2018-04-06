@@ -80,6 +80,9 @@ impl Engine where {
                   self.command_buffer.truncate(len);
                   self.buffer.put_char(ch);
               }
+              self.buffer.for_each(&mut |line| {
+                  line.for_each(&mut |ch| { print!("{}", ch) })
+              });
               println!("{:?}", self.command_buffer);
             }
             Mode::Normal => {
@@ -112,6 +115,9 @@ impl Engine where {
                   self.down();
                   self.clear_command_buffer();
               } else if self.conf.insert_char_here.contains(&self.command_buffer) {
+                  if self.buffer.get_current_line_index().is_none() {
+                      self.buffer.new_line();
+                  }
                   self.switch_mode(Mode::Insert);
               } else if self.conf.write_buffer.contains(&self.command_buffer) {
                   self.buffer.save_buffer("/Users/amanjsherwany/Desktop/test2-1.txt");

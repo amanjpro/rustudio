@@ -200,6 +200,7 @@ impl Buffer {
             self.new_line();
         } else {
             if let Some(mut line) = self.get_mut_current_line() {
+                println!("INSERTED");
                 line.insert(ch);
             };
         }
